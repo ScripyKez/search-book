@@ -1,12 +1,14 @@
 import "./App.css";
-import Header from "components/Header/Header";
-import Main from "components/Main/Main";
+import { Routes, Route } from "react-router-dom";
+import HomePage from "pages/HomePage";
+import BookPage from "pages/BookPage";
 
 function App() {
   return (
-    <>
-      <Header />
-      <Main />
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/:id" element={<BookPage />} />
+
       {/* <h1>Search for books</h1>
         <Search />
         <Sorting />
@@ -16,7 +18,7 @@ function App() {
         <Books />
       </Main>
       <Book /> */}
-    </>
+    </Routes>
   );
 }
 

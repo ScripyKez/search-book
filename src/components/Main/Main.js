@@ -38,6 +38,7 @@ export default function Main() {
         {category === "All" ? (
           value?.map((book, i) => (
             <CardBook
+              id={book.id}
               key={book.id + i}
               category={book.volumeInfo.categories}
               title={book.volumeInfo.title}
