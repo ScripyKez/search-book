@@ -1,14 +1,15 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useRef, useEffect } from "react";
 import {
-  setFilter,
   setBooks,
   setCategory,
   setSearch,
   setSortBy,
   setCounter,
+  loadBook,
 } from "store/slices/booksSlice";
 import axios from "axios";
+import cx from "clsx";
 
 import { BsSearch } from "react-icons/bs";
 
@@ -17,7 +18,9 @@ import { BsSearch } from "react-icons/bs";
 
 export default function Header() {
   const dispatch = useDispatch();
-  const { page, search, value, sortBy } = useSelector(state => state.books);
+  const { page, search, value, sortBy, category } = useSelector(
+    state => state.books
+  );
 
   const ref = useRef(null);
   const ref2 = useRef(null);
@@ -33,71 +36,86 @@ export default function Header() {
     dispatch(setBooks(data.items));
   };
 
+  const handleCat = async cat => {
+    if (cat === "All") {
+      const { data } = await axios
+        .get(
+          `https://www.googleapis.com/books/v1/volumes?q=${search}&key=AIzaSyDXo-Zc1iqdSXL6Pw0RkU7dqwnCpdSqM9Y&maxResults=30&startIndex=${page}&orderBy=${sortBy}`
+        )
+        .catch(err => console.log(err));
+      dispatch(setCounter(data.totalItems));
+      dispatch(setBooks(data.items));
+      return;
+    }
+    const { data } = await axios
+      .get(
+        `https://www.googleapis.com/books/v1/volumes?q=${search}+subject:${cat}&key=AIzaSyDXo-Zc1iqdSXL6Pw0RkU7dqwnCpdSqM9Y&maxResults=30&startIndex=${page}&orderBy=${sortBy}`
+      )
+      .catch(err => console.log(err));
+    dispatch(setCounter(data.totalItems));
+    dispatch(setBooks(data.items));
+  };
+
+  const nextBooks = async cat => {
+    if (cat === "All") {
+      const { data } = await axios
+        .get(
+          `https://www.googleapis.com/books/v1/volumes?q=${search}&key=AIzaSyDXo-Zc1iqdSXL6Pw0RkU7dqwnCpdSqM9Y&maxResults=30&startIndex=${page}&orderBy=${sortBy}`
+        )
+        .catch(err => console.log(err));
+      dispatch(setCounter(data.totalItems));
+      dispatch(loadBook(data.items));
+      return data.items;
+    }
+    const { data } = await axios
+      .get(
+        `https://www.googleapis.com/books/v1/volumes?q=${search}+subject:${cat}&key=AIzaSyDXo-Zc1iqdSXL6Pw0RkU7dqwnCpdSqM9Y&maxResults=30&startIndex=${page}&orderBy=${sortBy}`
+      )
+      .catch(err => console.log(err));
+    dispatch(setCounter(data.totalItems));
+    dispatch(loadBook(data.items));
+    return data.items;
+  };
+
   useEffect(() => {
     if (search) {
-      handleSearch(search);
+      handleCat(category);
     }
-  }, [sortBy]);
+  }, [category, sortBy, search]);
 
-  function filter(category) {
-    if (category === "ALL") {
-      dispatch(setBooks(value));
-    } else if (category === "Art") {
-      dispatch(
-        setFilter(value.filter(book => book.volumeInfo.categories == "Art"))
-      );
-    } else if (category === "Biography") {
-      dispatch(
-        setFilter(
-          value.filter(book => book.volumeInfo.categories == "Biography")
-        )
-      );
-    } else if (category === "Computers") {
-      dispatch(
-        setFilter(
-          value.filter(book => book.volumeInfo.categories == "Computers")
-        )
-      );
-    } else if (category === "History") {
-      dispatch(
-        setFilter(value.filter(book => book.volumeInfo.categories == "History"))
-      );
-    } else if (category === "Medical") {
-      dispatch(
-        setFilter(
-          value.filter(book => book.volumeInfo.categories == "Medicine")
-        )
-      );
-    } else if (category === "Poetry") {
-      dispatch(
-        setFilter(value.filter(book => book.volumeInfo.categories == "Poetry"))
-      );
+  useEffect(() => {
+    if (search) {
+      nextBooks(category);
     }
-  }
+  }, [page]);
 
   return (
-    <header className="w-full bg-slate-200 justify-center flex flex-col py-10">
-      <h1 className="m-auto font-bold text-3xl">Search for books</h1>
-      <div className="m-auto flex bg-white p-2 rounded-lg mt-6 w-[50%]">
+    <header
+      className={cx(
+        ` transition-[height] ease-in-out duration-800 transform ${
+          value.length > 0 ? "h-[300px]" : "h-[100vh]"
+        } w-full bg-slate-200 justify-center flex flex-col py-10`
+      )}
+    >
+      <h1 className="mt-auto mx-auto font-bold text-3xl">Search for books</h1>
+      <div className="my-2 mx-auto flex bg-white rounded-lg mt-6 w-[50%] relative">
         <input
           ref={ref}
-          className="p-2 outline-none w-full"
+          className="transition-all ease-in-out duration-200 border-2 p-4 rounded-lg outline-none w-full focus:border-blue-500 focus:border-2 "
           type="text"
           placeholder="Search for books"
           onKeyDown={e => {
             if (e.key === "Enter") {
               e.preventDefault();
               dispatch(setSearch(e.target.value));
-              handleSearch(e.target.value);
             }
           }}
         />
         <button
-          className="pr-2"
+          className="absolute right-0 top-0 h-[100%] w-[50px] border-l-slate-200 border-l-2 pl-3"
           onClick={e => {
             e.preventDefault();
             dispatch(setSearch(ref.current.value));
-            handleSearch(ref.current.value);
           }}
         >
           <BsSearch size={22} />
@@ -109,7 +127,6 @@ export default function Header() {
         <select
           onChange={() => {
             dispatch(setCategory(ref3.current.value));
-            filter(ref3.current.value);
           }}
           className="rounded-lg outline-none p-2"
           ref={ref3}

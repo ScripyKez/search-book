@@ -6,7 +6,6 @@ const initialState = {
   search: "",
   sortBy: "relevance",
   category: "All",
-  filter: [],
   counter: 0,
 };
 
@@ -32,11 +31,11 @@ const booksSlice = createSlice({
     setCategory(state, action) {
       state.category = action.payload;
     },
-    setFilter(state, actions) {
-      state.filter = actions.payload;
-    },
     setCounter(state, actions) {
       state.counter = actions.payload;
+    },
+    nextPage(state) {
+      state.page += 30;
     },
   },
 });
@@ -48,7 +47,7 @@ export const {
   clearBooks,
   setSortBy,
   setCategory,
-  setFilter,
   setCounter,
+  nextPage,
 } = booksSlice.actions;
 export default booksSlice.reducer;

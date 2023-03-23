@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { loadBook } from "store/slices/booksSlice";
+import { loadBook, nextPage } from "store/slices/booksSlice";
 import CardBook from "components/CardBook/CardBook";
 import axios from "axios";
 import cx from "clsx";
@@ -8,7 +8,7 @@ import cx from "clsx";
 export default function Main() {
   const dispatch = useDispatch();
 
-  const { filter, value, page, search, sortBy, category, counter } =
+  const {  value, page, search, sortBy,  counter } =
     useSelector(state => state.books);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -28,14 +28,14 @@ export default function Main() {
 
   return (
     <main className="max-w-[1600px] m-auto my-3">
-      {value.length > 0 && (
+      {value?.length > 0 && (
         <h2 className="text-center my-4 text-xl font-medium">
           <span className="italic">{counter}</span> results for{" "}
           <span>"{search}"</span>
         </h2>
       )}
       <div className="flex flex-wrap justify-center align-middle">
-        {category === "All" ? (
+        {value ? (
           value?.map((book, i) => (
             <CardBook
               id={book.id}
@@ -46,19 +46,9 @@ export default function Main() {
               authors={book.volumeInfo.authors}
             />
           ))
-        ) : filter.length !== 0 ? (
-          filter.map((book, i) => (
-            <CardBook
-              key={book.id + i}
-              category={book.volumeInfo.categories}
-              title={book.volumeInfo.title}
-              img={book.volumeInfo.imageLinks?.thumbnail}
-              authors={book.volumeInfo.authors}
-            />
-          ))
         ) : (
           <h3 className="mb-4 text-2xl font-bold text-slate-500">
-            Nothing was found for this category :(
+            Nothing was found :(
           </h3>
         )}
       </div>
@@ -66,7 +56,7 @@ export default function Main() {
       <button
         onClick={e => {
           e.preventDefault();
-          loadMore();
+          dispatch(nextPage());
         }}
         className={cx(
           "w-full text-xl text-white font-semibold rounded-xl py-1 bg-sky-300 hover:bg-sky-400",
