@@ -7,6 +7,7 @@ const initialState = {
   sortBy: "relevance",
   category: "All",
   counter: 0,
+  loading: false,
 };
 
 const booksSlice = createSlice({
@@ -37,6 +38,9 @@ const booksSlice = createSlice({
     nextPage(state) {
       state.page += 30;
     },
+    setLoading(state, action) {
+      state.loading = action.payload;
+    },
   },
 });
 
@@ -49,5 +53,6 @@ export const {
   setCategory,
   setCounter,
   nextPage,
+  setLoading,
 } = booksSlice.actions;
 export default booksSlice.reducer;

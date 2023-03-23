@@ -7,6 +7,7 @@ import {
   setSortBy,
   setCounter,
   loadBook,
+  setLoading,
 } from "store/slices/booksSlice";
 import axios from "axios";
 import cx from "clsx";
@@ -18,7 +19,7 @@ import { BsSearch } from "react-icons/bs";
 
 export default function Header() {
   const dispatch = useDispatch();
-  const { page, search, value, sortBy, category } = useSelector(
+  const { page, search, value, sortBy, category, loading } = useSelector(
     state => state.books
   );
 
@@ -45,6 +46,7 @@ export default function Header() {
         .catch(err => console.log(err));
       dispatch(setCounter(data.totalItems));
       dispatch(setBooks(data.items));
+      dispatch(setLoading(true));
       return;
     }
     const { data } = await axios
@@ -54,6 +56,7 @@ export default function Header() {
       .catch(err => console.log(err));
     dispatch(setCounter(data.totalItems));
     dispatch(setBooks(data.items));
+    dispatch(setLoading(true));
   };
 
   const nextBooks = async cat => {
@@ -93,7 +96,7 @@ export default function Header() {
     <header
       className={cx(
         ` transition-[height] ease-in-out duration-800 transform ${
-          value.length > 0 ? "h-[300px]" : "h-[100vh]"
+          loading ? "h-[300px]" : "h-[100vh]"
         } w-full bg-slate-200 justify-center flex flex-col py-10`
       )}
     >
