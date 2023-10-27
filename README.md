@@ -1,9 +1,8 @@
-# Поиск книг
+# [SPA] Поиск книг
 
 ссылка на деплой проекта - https://search-book-prr8xwcmw-scripykez.vercel.app
 
-## Available Scripts
+## Использование api google books
 
-In the project directory, you can run:
+React, Tailwind, React-router-dom
 
-### `npm start`
